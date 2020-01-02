@@ -1,42 +1,33 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
 
-function nuevoCliente({history}) {
-  
-  const [cliente, guardarCliente] = useState({
-    nombre:'',
-    apellido:'',
-    empresa:'',
-    email:'',
-    telefono:''
+function EditarCliente(props) {
+
+    const {id} = props.match.params;
+
+  const [cliente, datosCliente] = useState ({
+    nombre: "",
+    apellido: "",
+    empresa: "",
+    email: "",
+    telefono: ""
   });
+const consultarAPI = async () =>{
+    const clienteConsulta = await clienteAxios.get(`/cliente/${id}`);
+    datosCliente(clienteConsulta.data)
+}
+  useEffect(()=>{
+    consultarAPI();
+  }, []);
   const actualizarState = e => {
-    guardarCliente({
+    datosCliente({
       ...cliente,
       [e.target.name]: e.target.value
     });
   };
-  const agregarCliente = e =>{
-    e.preventDefault();
-    clienteAxios.post('/clientes', cliente).then(res =>{
-      if(res.data.code === 11000){
-        Swal.fire({
-          type:'error',
-          title:'Hubo un error',
-          text: 'Ese cliente ya está registrado'
-        })
-      }else{
-        Swal.fire(
-          'Se agregó el cliente',
-          res.data.mensaje,
-          'success'
-        )
-      }
-        history.push('/');
-    });
-  }
+
   const validarCliente = () => {
     const { nombre, apellido, email, empresa, telefono } = cliente;
     let valido =
@@ -47,9 +38,29 @@ function nuevoCliente({history}) {
       !telefono.length;
     return valido;
   };
+  const actualizarCliente = e => {
+      e.preventDefault();
+
+      clienteAxios.put(`/clientes/${cliente._id}`, cliente).then( res =>{
+        if(res.data.code === 11000){
+            Swal.fire({
+              type:'error',
+              title:'Hubo un error',
+              text: 'Ese cliente ya está registrado'
+            })
+          }else{
+            Swal.fire(
+              'Se actualizó correctamente',
+              res.data.mensaje,
+              'success'
+            )
+          }
+          props.history.push('/');
+      });
+  }
   return (
     <Fragment>
-      <form onSubmit={agregarCliente}>
+      <form onSubmit={actualizarCliente}>
         <legend>Llena todos los campos</legend>
 
         <div className="campo">
@@ -59,6 +70,7 @@ function nuevoCliente({history}) {
             placeholder="Nombre Cliente"
             name="nombre"
             onChange={actualizarState}
+            value={cliente.nombre}
           />
         </div>
 
@@ -69,6 +81,7 @@ function nuevoCliente({history}) {
             placeholder="Apellido Cliente"
             name="apellido"
             onChange={actualizarState}
+            value={cliente.apellido}
           />
         </div>
 
@@ -79,6 +92,7 @@ function nuevoCliente({history}) {
             placeholder="Empresa Cliente"
             name="empresa"
             onChange={actualizarState}
+            value={cliente.empresa}
           />
         </div>
 
@@ -89,6 +103,7 @@ function nuevoCliente({history}) {
             placeholder="Email Cliente"
             name="email"
             onChange={actualizarState}
+            value={cliente.email}
           />
         </div>
 
@@ -99,6 +114,7 @@ function nuevoCliente({history}) {
             placeholder="Teléfono Cliente"
             name="telefono"
             onChange={actualizarState}
+            value={cliente.telefono}
           />
         </div>
 
@@ -114,4 +130,4 @@ function nuevoCliente({history}) {
     </Fragment>
   );
 }
-export default withRouter(nuevoCliente);
+export default withRouter(EditarCliente);
