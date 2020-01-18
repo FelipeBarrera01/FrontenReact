@@ -108,4 +108,4 @@ const [archivo, guardarArchivo] = useState('');
       </Fragment>
     )
 }
-export default EditarProductos;
+export default withRouter(EditarProductos);

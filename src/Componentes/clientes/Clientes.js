@@ -1,23 +1,50 @@
-import React, {useEffect, useState, Fragment } from 'react';
+import React, {useEffect, useState, Fragment, useContext } from 'react';
 
 import clienteAxios from '../../config/axios';
 
 import Cliente from './Cliente';
 
-import { Link } from 'react-router-dom'; 
-function Clientes(){
+import { Link ,withRouter} from 'react-router-dom'; 
+import {CRMContext} from '../../context/CRMContext';
+
+function Clientes(props){
     const [clientes, guardarClientes] = useState([]);
-    const consultarAPI = async () =>{
-        const clientesConsulta = await clienteAxios.get('clientes');
-        guardarClientes(clientesConsulta.data);
-    }
+    const [auth, guardarAuth] = useContext(CRMContext);
+
+
     useEffect(()=>{
-        consultarAPI();
+        if(auth.token !== ''){
+            const consultarAPI = async () =>{
+
+                try {
+                    const clientesConsulta = await clienteAxios.get('clientes', {
+                        headers:{
+                            Authorization: `Bearer ${auth.token}`
+                        }
+                    });
+                    guardarClientes(clientesConsulta.data);
+                } catch (error) {
+                    if(error.response.status = 500){
+                        props.history.push('/iniciar-sesion')
+                    }
+                }
+
+             
+        
+          
+            
+            }
+            consultarAPI();
+        }else{
+            props.history.push('/iniciar-sesion');
+        }
+      
+      
     },[clientes]);
 
     return(
         <Fragment>
-            <Link to={"nuevo-cliente.html"} className="btn btn-verde nvo-cliente"> <i class="fas fa-plus-circle"></i>
+            <Link to={"/clientes/nuevo"} className="btn btn-verde nvo-cliente"> <i class="fas fa-plus-circle"></i>
                 Nuevo Cliente
             </Link>
             <ul className="listado-Clientes">
@@ -31,3 +58,4 @@ function Clientes(){
         </Fragment>
     )
 }
+export default withRouter(Clientes);
