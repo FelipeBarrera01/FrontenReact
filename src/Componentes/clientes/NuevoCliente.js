@@ -1,10 +1,14 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useContext } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
+import {CRMContext} from '../../context/CRMContext';
 
-function nuevoCliente({history}) {
-  
+
+function nuevoCliente ({history}) {
+
+  const [auth, guardarAuth] = useContext(CRMContext);
+
   const [cliente, guardarCliente] = useState({
     nombre:'',
     apellido:'',
@@ -47,7 +51,13 @@ function nuevoCliente({history}) {
       !telefono.length;
     return valido;
   };
+
+  if(!auth.auth && (localStorage.getItem('token') === auth.token)){
+    history.push('/iniciar-sesion')
+  }
+
   return (
+
     <Fragment>
       <form onSubmit={agregarCliente}>
         <legend>Llena todos los campos</legend>
